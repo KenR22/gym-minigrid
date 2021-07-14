@@ -59,8 +59,8 @@ class DynamicObstaclesEnv(MiniGridEnv):
 
     def step(self, action):
         # Invalid action
-        if action >= self.action_space.n:
-            action = 0
+        #if action >= self.action_space.n:
+            #action = 0
 
         # Check if there is an obstacle in front of the agent
         front_cell = self.grid.get(*self.front_pos)

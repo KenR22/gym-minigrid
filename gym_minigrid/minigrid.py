@@ -340,6 +340,7 @@ class Grid:
 
         self.width = width
         self.height = height
+        self.agent_state = 1
 
         self.grid = [None] * width * height
 
@@ -441,18 +442,21 @@ class Grid:
         agent_dir=None,
         highlight=False,
         tile_size=TILE_PIXELS,
-        subdivs=3
+        subdivs=3,
+        agent_state=None
     ):
         """
         Render a tile and cache the result
         """
 
         # Hash map lookup key for the cache
-        key = (agent_dir, highlight, tile_size)
-        key = obj.encode() + key if obj else key
+        if (agent_dir is None) :
+            key = (agent_dir, highlight, tile_size)
+            key = obj.encode() + key if obj else key
+            
 
-        if key in cls.tile_cache:
-            return cls.tile_cache[key]
+            if key in cls.tile_cache:
+                return cls.tile_cache[key]
 
         img = np.zeros(shape=(tile_size * subdivs, tile_size * subdivs, 3), dtype=np.uint8)
 
@@ -462,28 +466,39 @@ class Grid:
 
         if obj != None:
             obj.render(img)
+        #agent_state=-1*agent_state
+        
+        #print(agent_dir,agent_state)
+        if (agent_state is not None) :
+            if(agent_state<0):
+                print("yellow")
+                agent_color=(255, 255, 0)
+            else:
+                print("red")
+                agent_color=(255, 0, 0)
+        if (agent_dir is not None) :
 
-        # Overlay the agent on top
-        if agent_dir is not None:
             tri_fn = point_in_triangle(
-                (0.12, 0.19),
-                (0.87, 0.50),
-                (0.12, 0.81),
-            )
+            (0.12, 0.19),
+            (0.87, 0.50),
+            (0.12, 0.81),
+        )
 
-            # Rotate the agent based on its direction
+        # Rotate the agent based on its direction
+
             tri_fn = rotate_fn(tri_fn, cx=0.5, cy=0.5, theta=0.5*math.pi*agent_dir)
-            fill_coords(img, tri_fn, (255, 0, 0))
+            fill_coords(img, tri_fn, agent_color) 
 
         # Highlight the cell if needed
-        if highlight:
+        if (highlight):
             highlight_img(img)
 
         # Downsample the image to perform supersampling/anti-aliasing
         img = downsample(img, subdivs)
 
         # Cache the rendered tile
-        cls.tile_cache[key] = img
+        if (agent_dir is None) :
+            cls.tile_cache[key] = img
 
         return img
 
@@ -492,7 +507,8 @@ class Grid:
         tile_size,
         agent_pos=None,
         agent_dir=None,
-        highlight_mask=None
+        highlight_mask=None,
+        agent_state=None
     ):
         """
         Render this grid at a given scale
@@ -519,7 +535,8 @@ class Grid:
                     cell,
                     agent_dir=agent_dir if agent_here else None,
                     highlight=highlight_mask[i, j],
-                    tile_size=tile_size
+                    tile_size=tile_size,
+                    agent_state=agent_state if agent_here else None
                 )
 
                 ymin = j * tile_size
@@ -651,15 +668,19 @@ class MiniGridEnv(gym.Env):
         see_through_walls=False,
         seed=1337,
         agent_view_size=7
+        
     ):
         # Can't set both grid_size and width/height
         if grid_size:
             assert width == None and height == None
             width = grid_size
             height = grid_size
+        
+        self.agent_state=1
 
         # Action enumeration for this environment
         self.actions = MiniGridEnv.Actions
+        
 
         # Actions are discrete integer values
         self.action_space = spaces.Discrete(len(self.actions))
@@ -696,6 +717,7 @@ class MiniGridEnv(gym.Env):
         # Current position and direction of the agent
         self.agent_pos = None
         self.agent_dir = None
+        agent_state=1
 
         # Initialize the RNG
         self.seed(seed=seed)
@@ -707,6 +729,7 @@ class MiniGridEnv(gym.Env):
         # Current position and direction of the agent
         self.agent_pos = None
         self.agent_dir = None
+        self.agent_state=1
 
         # Generate a new random grid at the start of each episode
         # To keep the same grid for each episode, call env.seed() with
@@ -742,7 +765,7 @@ class MiniGridEnv(gym.Env):
         """
         sample_hash = hashlib.sha256()
 
-        to_encode = [self.grid.encode().tolist(), self.agent_pos, self.agent_dir]
+        to_encode = [self.grid.encode(), self.agent_pos, self.agent_dir]
         for item in to_encode:
             sample_hash.update(str(item).encode('utf8'))
 
@@ -1116,10 +1139,13 @@ class MiniGridEnv(gym.Env):
 
         # Rotate right
         elif action == self.actions.right:
+            
             self.agent_dir = (self.agent_dir + 1) % 4
+            
 
         # Move forward
         elif action == self.actions.forward:
+            
             if fwd_cell == None or fwd_cell.can_overlap():
                 self.agent_pos = fwd_pos
             if fwd_cell != None and fwd_cell.type == 'goal':
@@ -1130,14 +1156,15 @@ class MiniGridEnv(gym.Env):
 
         # Pick up an object
         elif action == self.actions.pickup:
-            if fwd_cell and fwd_cell.can_pickup():
-                if self.carrying is None:
-                    self.carrying = fwd_cell
-                    self.carrying.cur_pos = np.array([-1, -1])
-                    self.grid.set(*fwd_pos, None)
+            self.agent_state=-1*self.agent_state
+
+
+            
+
 
         # Drop an object
         elif action == self.actions.drop:
+            #self.agent_state=-1*self.agent_state
             if not fwd_cell and self.carrying:
                 self.grid.set(*fwd_pos, self.carrying)
                 self.carrying.cur_pos = fwd_pos
@@ -1150,7 +1177,9 @@ class MiniGridEnv(gym.Env):
 
         # Done action (not used by default)
         elif action == self.actions.done:
+            #self.agent_dir=self.agent_dir+1-1
             pass
+            #done = True
 
         else:
             assert False, "unknown action"
@@ -1230,7 +1259,9 @@ class MiniGridEnv(gym.Env):
             tile_size,
             agent_pos=(self.agent_view_size // 2, self.agent_view_size - 1),
             agent_dir=3,
-            highlight_mask=vis_mask
+            highlight_mask=vis_mask,
+            agent_state=self.agent_state
+            
         )
 
         return img
@@ -1285,7 +1316,10 @@ class MiniGridEnv(gym.Env):
             tile_size,
             self.agent_pos,
             self.agent_dir,
-            highlight_mask=highlight_mask if highlight else None
+            highlight_mask=highlight_mask if highlight else None,
+            agent_state=self.agent_state
+            
+            
         )
 
         if mode == 'human':
