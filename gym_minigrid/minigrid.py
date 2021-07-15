@@ -718,6 +718,7 @@ class MiniGridEnv(gym.Env):
         self.agent_pos = None
         self.agent_dir = None
         agent_state=1
+        self.counter=0
 
         # Initialize the RNG
         self.seed(seed=seed)
@@ -730,6 +731,7 @@ class MiniGridEnv(gym.Env):
         self.agent_pos = None
         self.agent_dir = None
         self.agent_state=1
+        self.counter=0
 
         # Generate a new random grid at the start of each episode
         # To keep the same grid for each episode, call env.seed() with
@@ -1183,9 +1185,15 @@ class MiniGridEnv(gym.Env):
 
         else:
             assert False, "unknown action"
-
+        # INNATE BEHAVIOR    
         if self.step_count >= self.max_steps:
             done = True
+        if (np.any(self.gen_obs()["image"]==9) and self.counter<=0):
+            self.agent_state=-1
+            self.counter=5
+        else:
+            self.agent_state=1
+            self.counter-=1
 
         obs = self.gen_obs()
 
