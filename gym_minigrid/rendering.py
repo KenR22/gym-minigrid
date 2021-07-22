@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import cv2
 
 def downsample(img, factor):
     """
@@ -116,3 +117,19 @@ def highlight_img(img, color=(255, 255, 255), alpha=0.30):
     blend_img = img + alpha * (np.array(color, dtype=np.uint8) - img)
     blend_img = blend_img.clip(0, 255).astype(np.uint8)
     img[:, :, :] = blend_img
+
+
+
+def place_emoji(img,tile_size,subdivs):
+    emoji = cv2.imread(r"D:\workspace_reinforcement\gym-minigrid\gym_minigrid\emoji_images\thinking_emoji.jpg")
+
+    
+    original_size=tile_size * subdivs
+    rescale_size=int(tile_size * subdivs*.9)
+    res = cv2.resize(emoji, dsize=(rescale_size, rescale_size), interpolation=cv2.INTER_CUBIC)
+    res[:,:, [2, 0]] = res[:,:, [0, 2]]
+    offset=(original_size-rescale_size)//2
+    img[offset:rescale_size+offset,offset:rescale_size+offset]=res
+    return img
+
+

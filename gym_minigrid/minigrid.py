@@ -485,9 +485,13 @@ class Grid:
         )
 
         # Rotate the agent based on its direction
+            if(agent_state<0):
+                place_emoji(img,tile_size, subdivs)
+            else:
+                tri_fn = rotate_fn(tri_fn, cx=0.5, cy=0.5, theta=0.5*math.pi*agent_dir)
+                fill_coords(img, tri_fn, agent_color) 
 
-            tri_fn = rotate_fn(tri_fn, cx=0.5, cy=0.5, theta=0.5*math.pi*agent_dir)
-            fill_coords(img, tri_fn, agent_color) 
+
 
         # Highlight the cell if needed
         if (highlight):
@@ -1191,13 +1195,13 @@ class MiniGridEnv(gym.Env):
         if self.step_count >= self.max_steps:
             done = True
         # INNATE BEHAVIOR
-        if(self.INNATE):    
+        """ if(self.INNATE):    
             if (np.any(self.gen_obs()["image"]==9) and self.counter<=0):
                 self.agent_state=-1
                 self.counter=5
             else:
                 self.agent_state=1
-                self.counter-=1
+                self.counter-=1"""
 
         obs = self.gen_obs()
 
