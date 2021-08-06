@@ -29,7 +29,7 @@ class DynamicObstaclesEnv(MiniGridEnv):
             see_through_walls=True,
         )
         # Allow only 3 actions permitted: left, right, forward
-        self.action_space = spaces.Discrete(self.actions.forward + 1)
+        #self.action_space = spaces.Discrete(self.actions.forward + 1)
         self.reward_range = (-1, 1)
 
     def _gen_grid(self, width, height):

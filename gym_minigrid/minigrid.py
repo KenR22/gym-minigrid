@@ -757,6 +757,15 @@ class MiniGridEnv(gym.Env):
 
         # Step count since episode start
         self.step_count = 0
+        self.observation_space = spaces.Box(
+            low=0,
+            high=255,
+            shape=(self.agent_view_size, self.agent_view_size, 3),
+            dtype='uint8'
+        )
+        self.observation_space = spaces.Dict({
+            'image': self.observation_space
+        })
 
         # Return first observation
         obs = self.gen_obs()
@@ -1144,11 +1153,13 @@ class MiniGridEnv(gym.Env):
             self.agent_dir -= 1
             if self.agent_dir < 0:
                 self.agent_dir += 4
+                self.agent_state=1
 
         # Rotate right
         elif action == self.actions.right:
             
             self.agent_dir = (self.agent_dir + 1) % 4
+            self.agent_state=1
             
 
         # Move forward
@@ -1161,10 +1172,11 @@ class MiniGridEnv(gym.Env):
                 reward = self._reward()
             if fwd_cell != None and fwd_cell.type == 'lava':
                 done = True
+            self.agent_state=1
 
         # Pick up an object
         elif action == self.actions.pickup:
-            self.agent_state=-1*self.agent_state
+            self.agent_state=-1
 
 
             
