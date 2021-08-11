@@ -118,10 +118,12 @@ def highlight_img(img, color=(255, 255, 255), alpha=0.30):
     blend_img = blend_img.clip(0, 255).astype(np.uint8)
     img[:, :, :] = blend_img
 
-
-
+import os, sys
+file_path=os.path.join(os.path.dirname(__file__))
+image_path=os.path.join(file_path, "emoji_images/thinking_emoji.jpg")
+print(file_path,image_path)
 def place_emoji(img,tile_size,subdivs):
-    emoji = cv2.imread(r"D:\workspace_reinforcement\gym-minigrid\gym_minigrid\emoji_images\thinking_emoji.jpg")
+    emoji = cv2.imread(image_path)
 
     
     original_size=tile_size * subdivs
