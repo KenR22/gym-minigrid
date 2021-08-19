@@ -469,13 +469,8 @@ class Grid:
         #agent_state=-1*agent_state
         
         #print(agent_dir,agent_state)
-        if (agent_state is not None) :
-            if(agent_state<0):
-                print("yellow")
-                agent_color=(255, 255, 0)
-            else:
-                print("red")
-                agent_color=(255, 0, 0)
+
+        agent_color=(255, 0, 0)
         if (agent_dir is not None) :
 
             tri_fn = point_in_triangle(
@@ -485,8 +480,11 @@ class Grid:
         )
 
         # Rotate the agent based on its direction
-            if(agent_state<0):
-                place_emoji(img,tile_size, subdivs)
+            if(agent_state==0):
+                place_emoji(img,tile_size, subdivs,1)
+
+            elif(agent_state<0):
+                place_emoji(img,tile_size, subdivs,0)
             else:
                 tri_fn = rotate_fn(tri_fn, cx=0.5, cy=0.5, theta=0.5*math.pi*agent_dir)
                 fill_coords(img, tri_fn, agent_color) 
@@ -1153,13 +1151,13 @@ class MiniGridEnv(gym.Env):
             self.agent_dir -= 1
             if self.agent_dir < 0:
                 self.agent_dir += 4
-                self.agent_state=1
+                #self.agent_state=1
 
         # Rotate right
         elif action == self.actions.right:
             
             self.agent_dir = (self.agent_dir + 1) % 4
-            self.agent_state=1
+            #self.agent_state=1
             
 
         # Move forward
@@ -1172,7 +1170,7 @@ class MiniGridEnv(gym.Env):
                 reward = self._reward()
             if fwd_cell != None and fwd_cell.type == 'lava':
                 done = True
-            self.agent_state=1
+            #self.agent_state=1
 
         # Pick up an object
         elif action == self.actions.pickup:

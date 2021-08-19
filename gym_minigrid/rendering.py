@@ -120,12 +120,15 @@ def highlight_img(img, color=(255, 255, 255), alpha=0.30):
 
 import os, sys
 file_path=os.path.join(os.path.dirname(__file__))
-image_path=os.path.join(file_path, "emoji_images/thinking_emoji.jpg")
-print(file_path,image_path)
-def place_emoji(img,tile_size,subdivs):
-    emoji = cv2.imread(image_path)
 
+#print(file_path,image_path)
+def place_emoji(img,tile_size,subdivs, emoji_type):
+    if (emoji_type==1):
+        image_path=os.path.join(file_path, "emoji_images/thinking_emoji.jpg")
+    else:
+        image_path=os.path.join(file_path, "emoji_images/fear_emoji.png")
     
+    emoji = cv2.imread(image_path)
     original_size=tile_size * subdivs
     rescale_size=int(tile_size * subdivs*.9)
     res = cv2.resize(emoji, dsize=(rescale_size, rescale_size), interpolation=cv2.INTER_CUBIC)
