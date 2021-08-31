@@ -1182,6 +1182,7 @@ class MiniGridEnv(gym.Env):
                 done = True
                 reward = self._reward()
             if fwd_cell != None and fwd_cell.type == 'lava':
+                reward=-1
                 done = True
             #self.agent_state=1
 
