@@ -109,7 +109,7 @@ def point_in_triangle(a, b, c):
 
     return fn
 
-def highlight_img(img, color=(255, 255, 255), alpha=0.30):
+def highlight_img(img, color=(255, 0, 0), alpha=0.30):
     """
     Add highlighting to an image
     """

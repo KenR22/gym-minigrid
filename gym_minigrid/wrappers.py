@@ -355,3 +355,37 @@ class DirectionObsWrapper(gym.core.ObservationWrapper):
         slope = np.divide( self.goal_position[1] - self.agent_pos[1] ,  self.goal_position[0] - self.agent_pos[0])
         obs['goal_direction'] = np.arctan( slope ) if self.type == 'angle' else slope
         return obs
+
+
+
+
+
+class LAVA_Reward(gym.core.Wrapper):
+    """
+    Returns a negative reward when the agent falls into the lava.
+    """
+
+    def __init__(self, env):
+        super().__init__(env)
+        
+
+    def step(self, action):
+        #obs, reward, done, info = self.env.step(action)
+        negative_reward=None
+
+        # If the action is forward and forward tile is a lava
+        # Return negative reward
+        fwd_pos = self.front_pos
+        fwd_cell = self.grid.get(*fwd_pos)
+        if action == self.actions.forward:
+            if fwd_cell != None and fwd_cell.type == 'lava':
+                negative_reward=-1
+                done = True
+
+        obs, reward, done, info = self.env.step(action)
+        if negative_reward!=None:
+            reward=negative_reward
+
+        return obs, reward, done, info
+
+        

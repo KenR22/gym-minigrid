@@ -1174,12 +1174,8 @@ class MiniGridEnv(gym.Env):
 
         # Pick up an object
         elif action == self.actions.pickup:
-            self.agent_state=-1
-
-
-            
-
-
+            self.agent_state=self.agent_state
+ 
         # Drop an object
         elif action == self.actions.drop:
             #self.agent_state=-1*self.agent_state
