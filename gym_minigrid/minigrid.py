@@ -466,9 +466,18 @@ class Grid:
 
         if obj != None:
             obj.render(img)
-        #agent_state=-1*agent_state
+        h_color=(255, 255, 255)
+
+        if(agent_state==0): #thinking
+            h_color=(0, 0, 255)
+
+        elif(agent_state<0): # fear
+            h_color=(255, 0, 0)
+        else: #normal
+            h_color=(255, 255, 255) 
+    #agent_state=-1*agent_state
         
-        #print(agent_dir,agent_state)
+      
 
         agent_color=(255, 0, 0)
         if (agent_dir is not None) :
@@ -480,26 +489,30 @@ class Grid:
         )
 
         # Rotate the agent based on its direction
-            if(agent_state==0):
+            if(agent_state==0): #thinking
                 place_emoji(img,tile_size, subdivs,1)
+                h_color=(0, 0, 255)
 
-            elif(agent_state<0):
+            elif(agent_state<0): # fear
                 place_emoji(img,tile_size, subdivs,0)
-            else:
+                h_color=(255, 0, 0)
+            else: #normal
                 tri_fn = rotate_fn(tri_fn, cx=0.5, cy=0.5, theta=0.5*math.pi*agent_dir)
-                fill_coords(img, tri_fn, agent_color) 
+                fill_coords(img, tri_fn, agent_color)
+                h_color=(255, 255, 255) 
+
 
 
 
         # Highlight the cell if needed
         if (highlight):
-            highlight_img(img)
+            highlight_img(img,color=h_color)
 
         # Downsample the image to perform supersampling/anti-aliasing
         img = downsample(img, subdivs)
 
         # Cache the rendered tile
-        if (agent_dir is None) :
+        if ((agent_dir is None) and (highlight is None)) :
             cls.tile_cache[key] = img
 
         return img
@@ -538,7 +551,7 @@ class Grid:
                     agent_dir=agent_dir if agent_here else None,
                     highlight=highlight_mask[i, j],
                     tile_size=tile_size,
-                    agent_state=agent_state if agent_here else None
+                    agent_state=agent_state
                 )
 
                 ymin = j * tile_size
