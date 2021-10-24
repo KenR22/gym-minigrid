@@ -367,7 +367,10 @@ class LAVA_Reward(gym.core.Wrapper):
 
     def __init__(self, env):
         super().__init__(env)
-        
+    
+
+    def observation(self, obs):
+        return 
 
     def step(self, action):
         #obs, reward, done, info = self.env.step(action)

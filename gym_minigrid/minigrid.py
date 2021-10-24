@@ -512,7 +512,7 @@ class Grid:
         img = downsample(img, subdivs)
 
         # Cache the rendered tile
-        if ((agent_dir is None) and (highlight is None)) :
+        if ((agent_dir is None)) :
             cls.tile_cache[key] = img
 
         return img

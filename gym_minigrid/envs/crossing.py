@@ -54,8 +54,11 @@ class CrossingEnv(MiniGridEnv):
             self.put_obj(self.obstacle_type(), i, j)
 
         # Sample path to goal
+        self.h=(h,rivers_v)
+
         path = [h] * len(rivers_v) + [v] * len(rivers_h)
         self.np_random.shuffle(path)
+        
 
         # Create openings
         limits_v = [0] + rivers_v + [height - 1]
@@ -75,6 +78,31 @@ class CrossingEnv(MiniGridEnv):
             else:
                 assert False
             self.grid.set(i, j, None)
+
+
+        limits_v = [0] + rivers_v + [height - 1]
+        limits_h = [0] + rivers_h + [width - 1]
+        room_i, room_j = 0, 0
+        for direction in path:
+            if direction is h:
+                i = limits_v[room_i + 1]
+                j = self.np_random.choice(
+                    range(limits_h[room_j] + 1, limits_h[room_j + 1]))
+                room_i += 1
+            elif direction is v:
+                i = self.np_random.choice(
+                    range(limits_v[room_i] + 1, limits_v[room_i + 1]))
+                j = limits_h[room_j + 1]
+                room_j += 1
+            else:
+                assert False
+            self.grid.set(i, j, None)
+        
+
+        
+
+        
+
 
         self.mission = (
             "avoid the lava and get to the green goal square"
